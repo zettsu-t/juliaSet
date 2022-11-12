@@ -1,6 +1,7 @@
 package com.github.zettsut.juliaset
 import java.io.File
 import scala.collection.mutable.ArrayBuffer
+import scala.math.sqrt
 import com.github.tototoshi.csv._
 
 /** A point as a complex number in screens
@@ -217,7 +218,7 @@ case class ParamSet(xOffset: Float, yOffset: Float, maxIter: Int, nPixels: Int, 
   *  @param y the Y coordinate
   */
 case class CommandLineArgs(args: Array[String]) {
-  val params: ParamSet = {
+  private val params: ParamSet = {
     val parser = argparse.default.ArgumentParser(description = "an example application")
     val xOffset = parser.param[Float](
       name = "--x_offset",
@@ -262,9 +263,11 @@ object CommandLineArgs {
 /** Write a Julia set to a CSV file
   */
 object Main extends App {
+  val upperTop    = sqrt(2.0).asInstanceOf[Float] + 0.1f
+  val lowerBottom = -upperTop
   val params      = CommandLineArgs(args)
-  val xs          = CoordinateSet(-1.5f, 1.5f, params.nPixels)
-  val ys          = CoordinateSet(-1.5f, 1.5f, params.nPixels)
+  val xs          = CoordinateSet(lowerBottom, upperTop, params.nPixels)
+  val ys          = xs
   val pointOffset = Point(params.xOffset, params.yOffset)
   val countSet    = CountSet(xs, ys, pointOffset, params.maxIter, 1e-5f)
   countSet.writeCsv(new File(params.csvFilename))
