@@ -1,0 +1,7 @@
+version: '3'
+services:
+  main:
+    build: .
+    image: scala-local
+    volumes:
+      - .:/home/work
