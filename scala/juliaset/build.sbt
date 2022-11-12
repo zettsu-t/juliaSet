@@ -9,3 +9,4 @@ lazy val root = (project in file(".")).
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % Test
 libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.10"
+libraryDependencies += "io.crashbox" %% "argparse" % "0.16.2"

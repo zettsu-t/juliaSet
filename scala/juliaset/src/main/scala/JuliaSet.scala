@@ -199,12 +199,73 @@ object CountSet {
     new CountSet(xs, ys, pointOffset, maxIter, eps)
 }
 
+/** A parameter set to draw
+  *
+  *  @constructor Create a new point
+  *  @param xOffset an x offset that is added in iterations
+  *  @param yOffset a y offset that is added in iterations
+  *  @param maxIter the maximum number of iterations
+  *  @param nPixels the width and height in pixels of an output image
+  *  @param csvFilename a path to save counts as a table
+  */
+case class ParamSet(xOffset: Float, yOffset: Float, maxIter: Int, nPixels: Int, csvFilename: String)
+
+/** Command line argments
+  *
+  *  @constructor Create a new point
+  *  @args command line argments
+  *  @param y the Y coordinate
+  */
+case class CommandLineArgs(args: Array[String]) {
+  val params: ParamSet = {
+    val parser = argparse.default.ArgumentParser(description = "an example application")
+    val xOffset = parser.param[Float](
+      name = "--x_offset",
+      default = 0.375f,
+      help = "An x offset that is added in iterations"
+    )
+
+    val yOffset = parser.param[Float](
+      name = "--y_offset",
+      default = 0.375f,
+      help = "An y offset that is added in iterations"
+    )
+
+    val maxIter = parser.param[Int](
+      name = "--max_iter",
+      default = 100,
+      help = "Maximum # of iterations"
+    )
+
+    val nPixels = parser.param[Int](
+      name = "--size",
+      default = 256,
+      help = "# of pixels in the output image"
+    )
+
+    val csvFilename = parser.param[String](
+      name = "--csv",
+      default = "scala_juliaset.csv",
+      help = "Output CSV filename"
+    )
+
+    parser.parseOrExit(args)
+    ParamSet(xOffset.value, yOffset.value, maxIter.value, nPixels.value, csvFilename.value)
+  }
+}
+
+object CommandLineArgs {
+  def apply(args: Array[String]) =
+    new CommandLineArgs(args).params
+}
+
 /** Write a Julia set to a CSV file
   */
 object Main extends App {
-  val xs          = CoordinateSet(-1.5f, 1.5f, 512)
-  val ys          = CoordinateSet(-1.5f, 1.5f, 512)
-  val pointOffset = Point(0.382f, 0.382f)
-  val countSet    = CountSet(xs, ys, pointOffset, 75, 1e-5f)
-  countSet.writeCsv(new File("out.csv"))
+  val params      = CommandLineArgs(args)
+  val xs          = CoordinateSet(-1.5f, 1.5f, params.nPixels)
+  val ys          = CoordinateSet(-1.5f, 1.5f, params.nPixels)
+  val pointOffset = Point(params.xOffset, params.yOffset)
+  val countSet    = CountSet(xs, ys, pointOffset, params.maxIter, 1e-5f)
+  countSet.writeCsv(new File(params.csvFilename))
 }

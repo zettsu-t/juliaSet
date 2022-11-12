@@ -141,3 +141,20 @@ class TestCountSet extends AnyFunSuite {
     }
   }
 }
+
+class TestCommandLineArgs extends AnyFunSuite {
+  test("Default") {
+    val args: Array[String] = Array()
+    val actual = CommandLineArgs(args)
+    val expected = ParamSet(0.375f, 0.375f, 100, 256, "scala_juliaset.csv")
+    assert(actual == expected)
+  }
+
+  test("Explicit") {
+    val args: Array[String] = Array("--x_offset", "0.25", "--y_offset", "0.5",
+      "--max_iter", "16", "--size", "31", "--csv", "_test.csv")
+    val actual = CommandLineArgs(args)
+    val expected = ParamSet(0.25f, 0.5f, 16, 31, "_test.csv")
+    assert(actual == expected)
+  }
+}
