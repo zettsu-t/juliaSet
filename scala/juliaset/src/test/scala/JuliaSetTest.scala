@@ -146,15 +146,15 @@ class TestCommandLineArgs extends AnyFunSuite {
   test("Default") {
     val args: Array[String] = Array()
     val actual = CommandLineArgs(args)
-    val expected = ParamSet(0.375f, 0.375f, 100, 256, "scala_juliaset.csv")
+    val expected = ParamSet(0.375f, 0.375f, 100, 256, "scala_juliaset.csv", "scala_juliaset.png")
     assert(actual == expected)
   }
 
   test("Explicit") {
     val args: Array[String] = Array("--x_offset", "0.25", "--y_offset", "0.5",
-      "--max_iter", "16", "--size", "31", "--csv", "_test.csv")
+      "--max_iter", "16", "--size", "31", "--csv", "_test.csv", "--image", "_test.png")
     val actual = CommandLineArgs(args)
-    val expected = ParamSet(0.25f, 0.5f, 16, 31, "_test.csv")
+    val expected = ParamSet(0.25f, 0.5f, 16, 31, "_test.csv", "_test.png")
     assert(actual == expected)
   }
 }

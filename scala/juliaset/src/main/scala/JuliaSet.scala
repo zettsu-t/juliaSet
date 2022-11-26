@@ -1,5 +1,7 @@
 package com.github.zettsut.juliaset
 import java.io.File
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
 import scala.collection.mutable.ArrayBuffer
 import scala.math.sqrt
 import com.github.tototoshi.csv._
@@ -159,6 +161,9 @@ object CoordinateSet {
   *  @param eps Tolerance to check if transformations are converged
   */
 class CountSet(xs: CoordinateSet, ys: CoordinateSet, pointOffset: Point, maxIter: Int, eps: Float) {
+  private val width  = xs().size
+  private val height = ys().size
+
   private val counts = {
     val matCounts = Array.ofDim[Int](ys().size, xs().size)
     ys().zipWithIndex.foreach {
@@ -193,6 +198,22 @@ class CountSet(xs: CoordinateSet, ys: CoordinateSet, pointOffset: Point, maxIter
       }
     }
   }
+
+  /** Write Julia set counts to a PNG file
+    *
+    *  @param file a file to write
+    */
+  def writeImage(file: File) {
+    val img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+    for (y <- 0 until height) {
+      for (x <- 0 until width) {
+        val color = counts(y)(x) * 0x101010
+        img.setRGB(x, y, color)
+      }
+    }
+
+    ImageIO.write(img, "png", file)
+  }
 }
 
 object CountSet {
@@ -208,14 +229,21 @@ object CountSet {
   *  @param maxIter the maximum number of iterations
   *  @param nPixels the width and height in pixels of an output image
   *  @param csvFilename a path to save counts as a table
+  *  @param imageFilename a path to save counts as an image
   */
-case class ParamSet(xOffset: Float, yOffset: Float, maxIter: Int, nPixels: Int, csvFilename: String)
+case class ParamSet(
+    xOffset: Float,
+    yOffset: Float,
+    maxIter: Int,
+    nPixels: Int,
+    csvFilename: String,
+    imageFilename: String
+)
 
 /** Command line argments
   *
   *  @constructor Create a new point
-  *  @args command line argments
-  *  @param y the Y coordinate
+  *  @param args command line argments
   */
 case class CommandLineArgs(args: Array[String]) {
   private val params: ParamSet = {
@@ -250,8 +278,21 @@ case class CommandLineArgs(args: Array[String]) {
       help = "Output CSV filename"
     )
 
+    val imageFilename = parser.param[String](
+      name = "--image",
+      default = "scala_juliaset.png",
+      help = "Output PNG filename"
+    )
+
     parser.parseOrExit(args)
-    ParamSet(xOffset.value, yOffset.value, maxIter.value, nPixels.value, csvFilename.value)
+    ParamSet(
+      xOffset.value,
+      yOffset.value,
+      maxIter.value,
+      nPixels.value,
+      csvFilename.value,
+      imageFilename.value
+    )
   }
 }
 
@@ -271,4 +312,5 @@ object Main extends App {
   val pointOffset = Point(params.xOffset, params.yOffset)
   val countSet    = CountSet(xs, ys, pointOffset, params.maxIter, 1e-5f)
   countSet.writeCsv(new File(params.csvFilename))
+  countSet.writeImage(new File(params.imageFilename))
 }
