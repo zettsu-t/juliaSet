@@ -5,6 +5,14 @@ import javax.imageio.ImageIO
 import scala.collection.mutable.ArrayBuffer
 import scala.math.sqrt
 import com.github.tototoshi.csv._
+import org.apache.spark.util.SizeEstimator
+
+object PrintObjectSize {
+  def printSize(x: AnyRef)(implicit line: sourcecode.Line, file: sourcecode.File) = {
+    val size = SizeEstimator.estimate(x)
+    println(s"${file.value}:${line.value} size=${size} bytes")
+  }
+}
 
 /** A point as a complex number in screens
   *
@@ -311,6 +319,7 @@ object Main extends App {
   val ys          = xs
   val pointOffset = Point(params.xOffset, params.yOffset)
   val countSet    = CountSet(xs, ys, pointOffset, params.maxIter, 1e-5f)
+  PrintObjectSize.printSize(countSet)
   countSet.writeCsv(new File(params.csvFilename))
   countSet.writeImage(new File(params.imageFilename))
 }
